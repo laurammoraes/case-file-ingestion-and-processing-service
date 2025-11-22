@@ -6,9 +6,18 @@ import {
   Param,
   Delete,
   Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../../domain/services/upload.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { UploadFileDto } from '../dtos/uploadFile.dto';
 
 @Controller('upload')
@@ -16,11 +25,36 @@ export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @ApiOperation({ summary: 'Upload file' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        filename: {
+          type: 'string',
+          description: 'File name',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File to upload',
+        },
+      },
+      required: ['filename', 'file'],
+    },
+  })
   @ApiResponse({ status: 200, description: 'File uploaded successfully' })
-  @ApiBody({ type: UploadFileDto })
+  @UseInterceptors(FileInterceptor('file'))
   @Post('')
-  async uploadFile(@Body() body: UploadFileDto) {
-    return this.uploadService.uploadFile(body);
+  async uploadFile(
+    @UploadedFile() file: any,
+    @Body() body: { filename: string },
+  ) {
+    const uploadDto: UploadFileDto = {
+      filename: body.filename,
+      file: file,
+    };
+    return this.uploadService.uploadFile(uploadDto);
   }
 
   @ApiOperation({ summary: 'Get all files' })
@@ -35,7 +69,8 @@ export class UploadController {
   @ApiResponse({ status: 200, description: 'File retrieved successfully' })
   @ApiParam({ name: 'id', description: 'File id' })
   @Get('files/:id')
-  async getFileById(@Param('id') id: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getFileById(@Param('id') _id: string) {
     // return this.uploadService.getFileById(id);
     return [];
   }
@@ -44,7 +79,8 @@ export class UploadController {
   @ApiResponse({ status: 200, description: 'File deleted successfully' })
   @ApiParam({ name: 'id', description: 'File id' })
   @Delete('files/:id')
-  async deleteFileById(@Param('id') id: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async deleteFileById(@Param('id') _id: string) {
     // return this.uploadService.deleteFileById(id);
     return [];
   }
@@ -54,7 +90,8 @@ export class UploadController {
   @ApiParam({ name: 'id', description: 'File id' })
   @ApiBody({ type: UploadFileDto })
   @Put('files/:id')
-  async updateFileById(@Param('id') id: string, @Body() body: UploadFileDto) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateFileById(@Param('id') _id: string, @Body() _body: UploadFileDto) {
     // return this.uploadService.updateFileById(id, body);
     return [];
   }
