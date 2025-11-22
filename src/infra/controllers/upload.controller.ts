@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Post,
   Body,
@@ -47,11 +48,15 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   @Post('')
   async uploadFile(
-    @UploadedFile() file: any,
+    @UploadedFile() file: Express.Multer.File,
     @Body() body: { filename: string },
   ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
     const uploadDto: UploadFileDto = {
-      filename: body.filename,
+      filename: body.filename || file.originalname,
       file: file,
     };
     return this.uploadService.uploadFile(uploadDto);
