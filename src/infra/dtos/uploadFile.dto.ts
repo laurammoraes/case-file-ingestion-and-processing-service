@@ -10,9 +10,10 @@ export class UploadFileDto {
   @ApiProperty({
     type: 'string',
     format: 'binary',
-    description: 'File to upload',
+    description: 'Upload a JPEG or PDF file',
   })
-  file: any;
+  @IsNotEmpty()
+  file: Express.Multer.File;
 
   @ApiProperty({ description: 'Created at', required: false })
   @IsDate()
