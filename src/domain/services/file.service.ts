@@ -132,7 +132,6 @@ export class FilesService {
   }
 
   async getFileByFileName(fileName: string) {
-
     const file = await this.fileRepository.getFileByName(fileName);
 
     if (!file) {
@@ -154,5 +153,59 @@ export class FilesService {
         year: 'numeric',
       }),
     };
+  }
+
+  async updateFile(fileName: string, file: Express.Multer.File) {
+    const fileExists = await this.fileRepository.getFileByName(fileName);
+    if (!fileExists) {
+      throw new BadRequestException('File not found');
+    }
+
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    if (
+      !file.mimetype.includes('image/jpeg') &&
+      !file.mimetype.includes('application/pdf')
+    ) {
+      throw new BadRequestException('File must be a JPEG or PDF');
+    }
+
+    if (file.size > 1024 * 1024 * 5) {
+      throw new BadRequestException('File must be less than 5MB');
+    }
+
+    let buffer: Buffer;
+    if (file.buffer) {
+      buffer = file.buffer instanceof Buffer ? file.buffer : Buffer.from(file.buffer);
+    } else if (file.path) {
+      const fs = await import('fs/promises');
+      buffer = await fs.readFile(file.path);
+    } else {
+      throw new BadRequestException(
+        `File buffer or path is required. File object: ${JSON.stringify({
+          hasBuffer: !!file.buffer,
+          hasPath: !!file.path,
+          keys: Object.keys(file),
+        })}`,
+      );
+    }
+
+    const contentType = file.mimetype;
+
+    const path = `files/${fileName}.updated`;
+    const filename = `${path}/${fileName}`;
+
+    const fileUrl = await this.storageService.uploadFile(
+      buffer,
+      filename,
+      contentType,
+    );
+
+    const fileData: { fileName: string; fileUrl: string } = {
+      fileName: `${fileName}.updated`,
+      fileUrl: fileUrl,
+    };
+    return this.fileRepository.updateFile(fileExists.id, fileData);
   }
 }

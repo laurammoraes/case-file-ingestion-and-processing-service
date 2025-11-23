@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PgService } from 'src/infra/database/pg.service';
+
 @Injectable()
 export class FileRepository {
   constructor(private readonly pgService: PgService) {}
@@ -50,5 +51,20 @@ export class FileRepository {
         updated_at: true,
       },
     });
+  }
+
+  async updateFile(
+    id: number,
+    fileData: { fileName: string; fileUrl: string }
+  ): Promise<any> {
+    const updatedFile = await this.pgService.files.update({
+      where: { id: id },
+      data: {
+        fileName: fileData.fileName,
+        fileUrl: fileData.fileUrl,
+        updated_at: new Date(),
+      },
+    });
+    return updatedFile;
   }
 }
