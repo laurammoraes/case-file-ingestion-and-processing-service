@@ -5,7 +5,7 @@ import { PgService } from 'src/infra/database/pg.service';
 export class FileRepository {
   constructor(private readonly pgService: PgService) {}
 
-  async create(fileData: { fileName: string; fileUrl: any }) {
+  async create(fileData: { fileName: string; fileUrl: string }) {
     return await this.pgService.$transaction(async (tx) => {
       return await tx.files.create({
         data: {
