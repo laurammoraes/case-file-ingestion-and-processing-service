@@ -20,6 +20,8 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UploadFileDto } from '../dtos/uploadFile.dto';
+import { UpdateFileDto } from '../dtos/updateFile.dto';
+
 
 @Controller('files')
 export class FilesController {
@@ -81,20 +83,37 @@ export class FilesController {
   @ApiResponse({ status: 200, description: 'File deleted successfully' })
   @ApiParam({ name: 'id', description: 'File id' })
   @Delete('files/:id')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async deleteFileById(@Param('id') _id: string) {
     // return this.uploadService.deleteFileById(id);
     return [];
   }
 
-  @ApiOperation({ summary: 'Update file by id' })
+  @ApiOperation({ summary: 'Update file by name' })
   @ApiResponse({ status: 200, description: 'File updated successfully' })
-  @ApiParam({ name: 'id', description: 'File id' })
-  @ApiBody({ type: UploadFileDto })
-  @Put('files/:id')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updateFileById(@Param('id') _id: string, @Body() _body: UploadFileDto) {
-    // return this.uploadService.updateFileById(id, body);
-    return [];
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        filename: {
+          type: 'string',
+          description: 'File name',
+        },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File to upload',
+        },
+      },
+      required: ['filename', 'file'],
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @Put('/fileName')
+  async updateFileById(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { filename: string },
+  ) {
+    return this.filesService.updateFile(body.filename, file);
   }
 }
