@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repositories';
 import { StorageService } from 'src/infra/s3/storage.service';
 import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
+import { UploadUseCase } from 'src/application/use-cases/upload';
 
 interface File {
   id: number;
@@ -27,7 +28,7 @@ interface FileResponse {
 export class FilesService {
   constructor(
     private readonly fileRepository: FileRepository,
-    private readonly storageService: StorageService,
+    private readonly uploadUseCase: UploadUseCase,
   ) {}
 
   async uploadFile(uploadDto: UploadFileDto) {
@@ -59,39 +60,14 @@ export class FilesService {
       throw new BadRequestException('File must be less than 5MB');
     }
 
-    let buffer: Buffer;
-    if (uploadDto.file.buffer) {
-      buffer =
-        uploadDto.file.buffer instanceof Buffer
-          ? uploadDto.file.buffer
-          : Buffer.from(uploadDto.file.buffer);
-    } else if (uploadDto.file.path) {
-      const fs = await import('fs/promises');
-      buffer = await fs.readFile(uploadDto.file.path);
-    } else {
-      throw new BadRequestException(
-        `File buffer or path is required. File object: ${JSON.stringify({
-          hasBuffer: !!uploadDto.file.buffer,
-          hasPath: !!uploadDto.file.path,
-          keys: Object.keys(uploadDto.file),
-        })}`,
-      );
+    const fileUrl = await this.uploadUseCase.execute(uploadDto);
+    if (!fileUrl) {
+      throw new BadRequestException('Failed to upload file');
     }
-
-    const contentType = uploadDto.file.mimetype;
-
-    const path = `files/${uploadDto.filename}`;
-    const filename = `${path}/${uploadDto.filename}`;
-
-    const fileUrl = await this.storageService.uploadFile(
-      buffer,
-      filename,
-      contentType,
-    );
 
     const fileData: { fileName: string; fileUrl: string } = {
       fileName: uploadDto.filename,
-      fileUrl: fileUrl,
+      fileUrl: fileUrl.url,
     };
 
     const fileCreated = await this.fileRepository.create(fileData);
@@ -175,36 +151,17 @@ export class FilesService {
       throw new BadRequestException('File must be less than 5MB');
     }
 
-    let buffer: Buffer;
-    if (file.buffer) {
-      buffer = file.buffer instanceof Buffer ? file.buffer : Buffer.from(file.buffer);
-    } else if (file.path) {
-      const fs = await import('fs/promises');
-      buffer = await fs.readFile(file.path);
-    } else {
-      throw new BadRequestException(
-        `File buffer or path is required. File object: ${JSON.stringify({
-          hasBuffer: !!file.buffer,
-          hasPath: !!file.path,
-          keys: Object.keys(file),
-        })}`,
-      );
+    const fileUrl = await this.uploadUseCase.execute({
+      filename: `${fileName}.updated`,
+      file: file,
+    });
+    if (!fileUrl) {
+      throw new BadRequestException('Failed to upload file');
     }
 
-    const contentType = file.mimetype;
-
-    const path = `files/${fileName}.updated`;
-    const filename = `${path}/${fileName}`;
-
-    const fileUrl = await this.storageService.uploadFile(
-      buffer,
-      filename,
-      contentType,
-    );
-
     const fileData: { fileName: string; fileUrl: string } = {
-      fileName: `${fileName}.updated`,
-      fileUrl: fileUrl,
+      fileName: `${fileName}`,
+      fileUrl: fileUrl.url,
     };
     return this.fileRepository.updateFile(fileExists.id, fileData);
   }
