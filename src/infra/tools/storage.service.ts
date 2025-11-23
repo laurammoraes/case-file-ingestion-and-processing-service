@@ -3,10 +3,8 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  //   GetObjectCommand,
-  //   DeleteObjectCommand
 } from '@aws-sdk/client-s3';
-// import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 import { ParametersService } from './parameters.service';
 
 @Injectable()

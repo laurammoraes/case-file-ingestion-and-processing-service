@@ -47,7 +47,7 @@ describe('FilesController (Integration)', () => {
     }
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [FilesModule, DatabaseModule],
+      imports: [FilesModule],
     })
       .overrideProvider(StorageService)
       .useValue(mockStorageService)
@@ -63,7 +63,9 @@ describe('FilesController (Integration)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(() => {
