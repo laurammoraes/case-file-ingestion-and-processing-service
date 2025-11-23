@@ -67,4 +67,13 @@ export class FileRepository {
     });
     return updatedFile;
   }
+
+  async deleteFile(id: number) {
+    return await this.pgService.files.update({
+      where: { id: id },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+  }
 }

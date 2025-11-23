@@ -29,6 +29,7 @@ export class FilesService {
   constructor(
     private readonly fileRepository: FileRepository,
     private readonly uploadUseCase: UploadUseCase,
+    private readonly storageService: StorageService,
   ) {}
 
   async uploadFile(uploadDto: UploadFileDto) {
@@ -164,5 +165,21 @@ export class FilesService {
       fileUrl: fileUrl.url,
     };
     return this.fileRepository.updateFile(fileExists.id, fileData);
+  }
+
+  async deleteFileByFileName(fileName: string) {
+    const fileExists = await this.fileRepository.getFileByName(fileName);
+    if (!fileExists) {
+      throw new BadRequestException('File not found');
+    }
+
+    await this.storageService.deleteFile(fileExists.fileName);
+
+    const deletedFile = await this.fileRepository.deleteFile(fileExists.id);
+    if (!deletedFile) {
+      throw new BadRequestException('Failed to delete file');
+    }
+
+    return deletedFile;
   }
 }
