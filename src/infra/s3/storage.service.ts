@@ -29,8 +29,6 @@ export class StorageService {
       Key: filename,
       Body: buffer,
       ContentType: contentType,
-      // ACL não é suportado quando o bucket tem "Bucket owner enforced"
-      // A permissão pública deve ser configurada via Bucket Policy no console AWS
     });
 
     await this.storageClient.send(command);
@@ -39,7 +37,6 @@ export class StorageService {
 
   getFileUrl(filename: string): string {
     const region = process.env.AWS_REGION || 'us-east-1';
-    // Formato da URL: https://bucket-name.s3.region.amazonaws.com/key
     return `https://${this.bucketName}.s3.${region}.amazonaws.com/${filename}`;
   }
 

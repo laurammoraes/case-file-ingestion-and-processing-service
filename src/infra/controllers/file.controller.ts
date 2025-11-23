@@ -18,11 +18,10 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { UploadFileDto } from '../dtos/uploadFile.dto';
-import { UpdateFileDto } from '../dtos/updateFile.dto';
-
-
+@ApiTags('Files')
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
@@ -53,22 +52,29 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: { filename: string },
   ) {
-    if (!file) {
-      throw new BadRequestException('File is required');
+    try {
+      if (!file) {
+        throw new BadRequestException('File is required');
+      }
+      const uploadDto: UploadFileDto = {
+        filename: body.filename || file.originalname,
+        file: file,
+      };
+      return this.filesService.uploadFile(uploadDto);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-
-    const uploadDto: UploadFileDto = {
-      filename: body.filename || file.originalname,
-      file: file,
-    };
-    return this.filesService.uploadFile(uploadDto);
   }
 
   @ApiOperation({ summary: 'Get all files' })
   @ApiResponse({ status: 200, description: 'Files retrieved successfully' })
   @Get('')
   async getFiles(): Promise<any> {
-    return await this.filesService.getAllFiles();
+    try {
+      return await this.filesService.getAllFiles();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ summary: 'Get file by name' })
@@ -76,7 +82,11 @@ export class FilesController {
   @ApiParam({ name: 'name', description: 'File name' })
   @Get('/fileName')
   async getFileById(@Param('name') fileName: string) {
-    return this.filesService.getFileByFileName(fileName);
+    try {
+      return await this.filesService.getFileByFileName(fileName);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ summary: 'Delete file by id' })
@@ -114,6 +124,10 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: { filename: string },
   ) {
-    return this.filesService.updateFile(body.filename, file);
+    try {
+      return await this.filesService.updateFile(body.filename, file);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

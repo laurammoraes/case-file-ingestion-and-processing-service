@@ -6,6 +6,7 @@ import { FileRepository } from '../../domain/repositories/file.repositories';
 import { PgService } from '../database/pg.service';
 import { StorageService } from '../s3/storage.service';
 import { ParametersService } from '../s3/parameters.service';
+import { UploadUseCase } from 'src/application/use-cases/upload';
 
 @Module({
   imports: [
@@ -20,6 +21,8 @@ import { ParametersService } from '../s3/parameters.service';
     PgService,
     StorageService,
     ParametersService,
+    UploadUseCase,
   ],
+  exports: [FilesService],
 })
 export class FilesModule {}
