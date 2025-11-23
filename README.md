@@ -45,7 +45,7 @@ AWS_SECRET_ACCESS_KEY=your-secret
 
 ## ▶️ Rodando o Projeto
 
-###
+### Banco de dados
 
 ```bash
 docker compose up -d 
