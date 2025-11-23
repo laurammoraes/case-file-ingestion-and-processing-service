@@ -36,23 +36,10 @@ export class StorageService {
     return this.getFileUrl(filename);
   }
 
-  getFileUrl(filename: string): string {
+  async getFileUrl(filename: string): Promise<string> {
     const region = process.env.AWS_REGION || 'us-east-1';
     return `https://${this.bucketName}.s3.${region}.amazonaws.com/${filename}`;
   }
-
-  // async getFileUrl(key: string): Promise<string> {
-  //   const command = new GetObjectCommand({
-  //     Bucket: this.bucketName,
-  //     Key: key,
-  //   });
-
-  //   const url = await getSignedUrl(this.storageClient, command, {
-  //     expiresIn: 60 * 60 * 24,
-  //   });
-
-  //   return url;
-  // }
 
   async deleteFile(filename: string) {
     const command = new DeleteObjectCommand({
@@ -60,6 +47,6 @@ export class StorageService {
       Key: filename,
     });
 
-    await this.storageClient.send(command);
+    await await this.storageClient.send(command);
   }
 }
