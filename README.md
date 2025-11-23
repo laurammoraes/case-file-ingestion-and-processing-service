@@ -47,16 +47,82 @@ $ npm run start:prod
 
 ## Run tests
 
+O projeto possui três tipos de testes configurados:
+
+### Testes Unitários
+Testam componentes isolados com mocks das dependências:
 ```bash
-# unit tests
-$ npm run test
+# Executar todos os testes unitários
+$ npm run test:unit
 
-# e2e tests
+# Executar testes em modo watch
+$ npm run test:watch
+```
+
+### Testes de Integração
+Testam a integração entre componentes:
+```bash
+# Executar testes de integração
+$ npm run test:integration
+```
+
+### Testes E2E (End-to-End)
+Testam a aplicação completa do ponto de vista do usuário:
+```bash
+# Executar testes e2e
 $ npm run test:e2e
+```
 
-# test coverage
+### Cobertura de Testes
+```bash
+# Gerar relatório de cobertura
 $ npm run test:cov
 ```
+
+### Executar Todos os Testes
+```bash
+# Executar todos os tipos de teste
+$ npm run test:all
+```
+
+## Estrutura de Testes
+
+```
+src/
+├── domain/
+│   ├── services/
+│   │   └── file.service.spec.ts          # Testes unitários do serviço
+│   └── repositories/
+│       └── file.repositories.spec.ts     # Testes unitários do repositório
+├── application/
+│   └── use-cases/
+│       └── upload.spec.ts                 # Testes unitários do use case
+└── infra/
+    └── controllers/
+        ├── file.controller.spec.ts        # Testes unitários do controller
+        └── file.controller.integration.spec.ts  # Testes de integração
+```
+
+## Configuração de Testes
+
+Os testes estão configurados para:
+- **Testes Unitários**: Mock de todas as dependências externas
+- **Testes de Integração**: Mock apenas de serviços externos (S3, banco de dados)
+- **Testes E2E**: Testam a aplicação completa com banco de dados real
+
+### Variáveis de Ambiente para Testes
+
+Para testes de integração e E2E, configure as seguintes variáveis de ambiente:
+
+```env
+NODE_ENV=test
+PG_DATABASE_URL=postgresql://user:password@localhost:5432/test_db
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=test-key
+AWS_SECRET_ACCESS_KEY=test-secret
+```
+
+**Nota**: Os testes de integração mockam o banco de dados e o S3 por padrão. Para testes E2E reais, você precisará de um banco de dados de teste configurado.
 
 ## Deployment
 

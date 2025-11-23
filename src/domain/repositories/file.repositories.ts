@@ -55,7 +55,7 @@ export class FileRepository {
 
   async updateFile(
     id: number,
-    fileData: { fileName: string; fileUrl: string }
+    fileData: { fileName: string; fileUrl: string },
   ): Promise<any> {
     const updatedFile = await this.pgService.files.update({
       where: { id: id },
