@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
-import { StorageService } from 'src/infra/s3/storage.service';
+import { StorageService } from 'src/infra/tools/storage.service';
 
 @Injectable()
 export class UploadUseCase {

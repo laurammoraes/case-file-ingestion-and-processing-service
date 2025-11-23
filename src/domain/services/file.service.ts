@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repositories';
-import { StorageService } from 'src/infra/s3/storage.service';
+import { StorageService } from 'src/infra/tools/storage.service';
 import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
 import { UploadUseCase } from 'src/application/use-cases/upload';
 
@@ -33,13 +33,8 @@ export class FilesService {
   ) {}
 
   async uploadFile(uploadDto: UploadFileDto) {
-    const name = await this.fileRepository.getFileByName(uploadDto.filename);
-    if (name) {
-      throw new BadRequestException('File name already exists');
-    }
-
     if (!uploadDto) {
-      throw new BadRequestException('Upload data is required');
+      throw new BadRequestException('File is required');
     }
 
     if (!uploadDto.filename) {
@@ -48,6 +43,11 @@ export class FilesService {
 
     if (!uploadDto.file) {
       throw new BadRequestException('File is required');
+    }
+
+    const name = await this.fileRepository.getFileByName(uploadDto.filename);
+    if (name) {
+      throw new BadRequestException('File name already exists');
     }
 
     if (
@@ -76,7 +76,6 @@ export class FilesService {
   }
 
   async getAllFiles(): Promise<FileResponse> {
-
     const files = await this.fileRepository.getAllFiles();
 
     const filesData = files.map((file) => {

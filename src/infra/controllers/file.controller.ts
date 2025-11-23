@@ -60,9 +60,13 @@ export class FilesController {
         filename: body.filename || file.originalname,
         file: file,
       };
-      return this.filesService.uploadFile(uploadDto);
+      return await this.filesService.uploadFile(uploadDto);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const message = error?.message || error?.toString() || 'An error occurred';
+      throw new BadRequestException(message);
     }
   }
 
@@ -73,7 +77,11 @@ export class FilesController {
     try {
       return await this.filesService.getAllFiles();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const message = error?.message || error?.toString() || 'An error occurred';
+      throw new BadRequestException(message);
     }
   }
 
@@ -85,7 +93,11 @@ export class FilesController {
     try {
       return await this.filesService.getFileByFileName(fileName);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const message = error?.message || error?.toString() || 'An error occurred';
+      throw new BadRequestException(message);
     }
   }
 
@@ -97,7 +109,11 @@ export class FilesController {
     try {
       return await this.filesService.deleteFileByFileName(name);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const message = error?.message || error?.toString() || 'An error occurred';
+      throw new BadRequestException(message);
     }
   }
 
@@ -130,7 +146,11 @@ export class FilesController {
     try {
       return await this.filesService.updateFile(body.filename, file);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      const message = error?.message || error?.toString() || 'An error occurred';
+      throw new BadRequestException(message);
     }
   }
 }
