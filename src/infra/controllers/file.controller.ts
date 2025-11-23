@@ -11,7 +11,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadService } from '../../domain/services/upload.service';
+import { FilesService } from '../../domain/services/file.service';
 import {
   ApiBody,
   ApiConsumes,
@@ -21,9 +21,9 @@ import {
 } from '@nestjs/swagger';
 import { UploadFileDto } from '../dtos/uploadFile.dto';
 
-@Controller('upload')
-export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+@Controller('files')
+export class FilesController {
+  constructor(private readonly filesService: FilesService) {}
 
   @ApiOperation({ summary: 'Upload file' })
   @ApiConsumes('multipart/form-data')
@@ -59,25 +59,22 @@ export class UploadController {
       filename: body.filename || file.originalname,
       file: file,
     };
-    return this.uploadService.uploadFile(uploadDto);
+    return this.filesService.uploadFile(uploadDto);
   }
 
   @ApiOperation({ summary: 'Get all files' })
   @ApiResponse({ status: 200, description: 'Files retrieved successfully' })
-  @Get('files')
-  async getFiles() {
-    // return this.uploadService.getFiles();
-    return [];
+  @Get('')
+  async getFiles(): Promise<any> {
+    return await this.filesService.getAllFiles();
   }
 
-  @ApiOperation({ summary: 'Get file by id' })
+  @ApiOperation({ summary: 'Get file by name' })
   @ApiResponse({ status: 200, description: 'File retrieved successfully' })
-  @ApiParam({ name: 'id', description: 'File id' })
-  @Get('files/:id')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getFileById(@Param('id') _id: string) {
-    // return this.uploadService.getFileById(id);
-    return [];
+  @ApiParam({ name: 'name', description: 'File name' })
+  @Get('/fileName')
+  async getFileById(@Param('name') fileName: string) {
+    return this.filesService.getFileByFileName(fileName);
   }
 
   @ApiOperation({ summary: 'Delete file by id' })

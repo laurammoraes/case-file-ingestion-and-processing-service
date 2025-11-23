@@ -17,4 +17,38 @@ export class FileRepository {
       });
     });
   }
+
+  async getAllFiles() {
+    return await this.pgService.files.findMany({
+      where: {
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        fileName: true,
+        fileUrl: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
+  async getFileByName(fileName: string) {
+    return await this.pgService.files.findFirst({
+      where: {
+        fileName: fileName,
+        deleted_at: null,
+      },
+      select: {
+        id: true,
+        fileName: true,
+        fileUrl: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+  }
 }

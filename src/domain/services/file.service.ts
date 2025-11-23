@@ -3,14 +3,39 @@ import { FileRepository } from '../repositories/file.repositories';
 import { StorageService } from 'src/infra/s3/storage.service';
 import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
 
+interface File {
+  id: number;
+  fileName: string;
+  fileUrl: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+interface FileResponse {
+  files: File[];
+  pagination: Pagination;
+}
+
 @Injectable()
-export class UploadService {
+export class FilesService {
   constructor(
     private readonly fileRepository: FileRepository,
     private readonly storageService: StorageService,
   ) {}
 
   async uploadFile(uploadDto: UploadFileDto) {
+    const name = await this.fileRepository.getFileByName(uploadDto.filename);
+    if (name) {
+      throw new BadRequestException('File name already exists');
+    }
+
     if (!uploadDto) {
       throw new BadRequestException('Upload data is required');
     }
@@ -34,16 +59,13 @@ export class UploadService {
       throw new BadRequestException('File must be less than 5MB');
     }
 
-    // O arquivo pode vir com buffer (memória) ou path (disco)
     let buffer: Buffer;
     if (uploadDto.file.buffer) {
-      // Arquivo em memória
       buffer =
         uploadDto.file.buffer instanceof Buffer
           ? uploadDto.file.buffer
           : Buffer.from(uploadDto.file.buffer);
     } else if (uploadDto.file.path) {
-      // Arquivo em disco
       const fs = await import('fs/promises');
       buffer = await fs.readFile(uploadDto.file.path);
     } else {
@@ -74,5 +96,63 @@ export class UploadService {
 
     const fileCreated = await this.fileRepository.create(fileData);
     return fileCreated;
+  }
+
+  async getAllFiles(): Promise<FileResponse> {
+
+    const files = await this.fileRepository.getAllFiles();
+
+    const filesData = files.map((file) => {
+      return {
+        id: file.id,
+        fileName: file.fileName,
+        fileUrl: file.fileUrl,
+        created_at: new Date(file.created_at).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }),
+        updated_at: new Date(file.updated_at).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }),
+      };
+    });
+
+    return {
+      files: filesData,
+      pagination: {
+        total: files.length,
+        page: 1,
+        limit: 10,
+        totalPages: Math.ceil(files.length / 10),
+      },
+    };
+  }
+
+  async getFileByFileName(fileName: string) {
+
+    const file = await this.fileRepository.getFileByName(fileName);
+
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+
+    return {
+      id: file.id,
+      fileName: file.fileName,
+      fileUrl: file.fileUrl,
+      created_at: new Date(file.created_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }),
+      updated_at: new Date(file.updated_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }),
+    };
   }
 }

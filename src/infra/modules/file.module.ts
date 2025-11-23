@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { UploadController } from '../../infra/controllers/upload.controller';
-import { UploadService } from '../../domain/services/upload.service';
+import { FilesController } from '../controllers/file.controller';
+import { FilesService } from '../../domain/services/file.service';
 import { MulterModule } from '@nestjs/platform-express';
-import { FileRepository } from 'src/domain/repositories/file.repositories';
+import { FileRepository } from '../../domain/repositories/file.repositories';
 import { PgService } from '../database/pg.service';
 import { StorageService } from '../s3/storage.service';
 import { ParametersService } from '../s3/parameters.service';
@@ -13,13 +13,13 @@ import { ParametersService } from '../s3/parameters.service';
       dest: './uploads',
     }),
   ],
-  controllers: [UploadController],
+  controllers: [FilesController],
   providers: [
-    UploadService,
+    FilesService,
     FileRepository,
     PgService,
     StorageService,
     ParametersService,
   ],
 })
-export class UploadModule {}
+export class FilesModule {}
