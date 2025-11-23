@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   S3Client,
   PutObjectCommand,
+  DeleteObjectCommand,
   //   GetObjectCommand,
   //   DeleteObjectCommand
 } from '@aws-sdk/client-s3';
@@ -53,12 +54,12 @@ export class StorageService {
   //   return url;
   // }
 
-  // async deleteFile(filename: string) {
-  //   const command = new DeleteObjectCommand({
-  //     Bucket: this.bucketName,
-  //     Key: filename,
-  //   });
+  async deleteFile(filename: string) {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: filename,
+    });
 
-  //   await this.storageClient.send(command);
-  // }
+    await this.storageClient.send(command);
+  }
 }

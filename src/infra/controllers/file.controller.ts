@@ -89,13 +89,16 @@ export class FilesController {
     }
   }
 
-  @ApiOperation({ summary: 'Delete file by id' })
+  @ApiOperation({ summary: 'Delete file by name' })
   @ApiResponse({ status: 200, description: 'File deleted successfully' })
-  @ApiParam({ name: 'id', description: 'File id' })
-  @Delete('files/:id')
-  async deleteFileById(@Param('id') _id: string) {
-    // return this.uploadService.deleteFileById(id);
-    return [];
+  @ApiParam({ name: 'name', description: 'File name' })
+  @Delete('/:name')
+  async deleteFileById(@Param('name') name: string) {
+    try {
+      return await this.filesService.deleteFileByFileName(name);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @ApiOperation({ summary: 'Update file by name' })
