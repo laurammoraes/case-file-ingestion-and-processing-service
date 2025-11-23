@@ -1,12 +1,26 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
-import { StorageService } from 'src/infra/tools/storage.service';
+import { FileEntity } from '../../domain/entities/file.entities';
+import { UploadFileDto } from '../../infra/dtos/uploadFile.dto';
+import { StorageService } from '../../infra/tools/storage.service';
 
 @Injectable()
 export class UploadUseCase {
   constructor(private readonly storageService: StorageService) {}
 
   async execute(uploadDto: UploadFileDto) {
+    const fileEntity = new FileEntity({
+      id: 0,
+      fileName: uploadDto.filename || '',
+      fileUrl: '',
+      created_at: new Date(),
+      updated_at: new Date(),
+      deleted_at: null,
+    });
+    const file = fileEntity.validate(uploadDto);
+    if (file.errors.length > 0) {
+      throw new BadRequestException(file.errors.join(', '));
+    }
+
     let buffer: Buffer;
     if (uploadDto.file.buffer) {
       buffer =

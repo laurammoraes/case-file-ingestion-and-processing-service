@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { FileRepository } from '../repositories/file.repositories';
-import { StorageService } from 'src/infra/tools/storage.service';
-import { UploadFileDto } from 'src/infra/dtos/uploadFile.dto';
-import { UploadUseCase } from 'src/application/use-cases/upload';
+import { StorageService } from '../../infra/tools/storage.service';
+import { UploadFileDto } from '../../infra/dtos/uploadFile.dto';
+import { UploadUseCase } from '../../application/use-cases/upload';
 
 interface File {
   id: number;
@@ -45,11 +45,6 @@ export class FilesService {
       throw new BadRequestException('File is required');
     }
 
-    const name = await this.fileRepository.getFileByName(uploadDto.filename);
-    if (name) {
-      throw new BadRequestException('File name already exists');
-    }
-
     if (
       !uploadDto.file.mimetype.includes('image/jpeg') &&
       !uploadDto.file.mimetype.includes('application/pdf')
@@ -59,6 +54,11 @@ export class FilesService {
 
     if (uploadDto.file.size > 1024 * 1024 * 5) {
       throw new BadRequestException('File must be less than 5MB');
+    }
+
+    const name = await this.fileRepository.getFileByName(uploadDto.filename);
+    if (name) {
+      throw new BadRequestException('File name already exists');
     }
 
     const fileUrl = await this.uploadUseCase.execute(uploadDto);

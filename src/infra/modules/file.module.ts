@@ -6,7 +6,7 @@ import { FileRepository } from '../../domain/repositories/file.repositories';
 import { PgService } from '../database/pg.service';
 import { StorageService } from '../tools/storage.service';
 import { ParametersService } from '../tools/parameters.service';
-import { UploadUseCase } from 'src/application/use-cases/upload';
+import { UploadUseCase } from '../../application/use-cases/upload';
 
 @Module({
   imports: [

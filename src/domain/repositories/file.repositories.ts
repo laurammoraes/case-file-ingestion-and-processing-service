@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PgService } from 'src/infra/database/pg.service';
+import { PgService } from '../../infra/database/pg.service';
 
 @Injectable()
 export class FileRepository {
